@@ -4,7 +4,6 @@ function Logout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // هنضيف هنا مسح بيانات تسجيل الدخول بعدين
     navigate("/");
   };
 

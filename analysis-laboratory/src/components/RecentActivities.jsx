@@ -1,31 +1,38 @@
+import { useLanguage } from "../constants/useLanguage";
+import { translations } from "../constants/translations";
+
 function RecentActivities() {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const activities = [
     {
       id: 1,
-      text: "Ahmed Ali requested Blood Test",
-      time: "5 min ago",
+      text: t.ahmedRequestedBloodTest,
+      time: t.fiveMinAgo,
     },
     {
       id: 2,
-      text: "Sara Mohamed completed Urine Test",
-      time: "20 min ago",
+      text: t.saraCompletedUrineTest,
+      time: t.twentyMinAgo,
     },
     {
       id: 3,
-      text: "New patient added",
-      time: "1 hour ago",
+      text: t.newPatientAdded,
+      time: t.oneHourAgo,
     },
     {
       id: 4,
-      text: "Invoice #205 paid",
-      time: "2 hours ago",
+      text: t.invoicePaid,
+      time: t.twoHoursAgo,
     },
   ];
 
   return (
     <div className="bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow p-6 h-full">
+
       <h2 className="text-xl font-bold mb-4">
-        🔔 Recent Activities
+        🔔 {t.recentActivities}
       </h2>
 
       {activities.map((item) => (
@@ -42,6 +49,7 @@ function RecentActivities() {
           </span>
         </div>
       ))}
+
     </div>
   );
 }

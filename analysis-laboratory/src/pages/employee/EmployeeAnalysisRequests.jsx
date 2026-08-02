@@ -1,622 +1,630 @@
 import { useState } from "react";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaSave, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
 import {
-  FaClipboardList,
-  FaClock,
-  FaCheckCircle,
-  FaCalendarDay,
-} from "react-icons/fa";
-import { getResults, saveResults } from "../../data/resultStorage";
-// import { useLocation } from "react-router-dom";
-function EmployeeAnalysisRequests() {
+  getResults,
+  saveResults,
+} from "../../data/analysisResultsStorage";
 
-const [search,setSearch] = useState("");
+import {
+  getRequests,
+  saveRequests,
+} from "../../data/analysisRequestsStorage";
 
-  const [requests, setRequests] = useState([
-    
-  {
-    id: 1,
-    patient: "Ahmed Ali",
-    analysis: "CBC",
-    doctor: "Dr. Nada",
-    date: "2026-06-25",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    patient: "Sara Mohamed",
-    analysis: "Blood Sugar",
-    doctor: "Dr. Nada",
-    date: "2026-06-24",
-    status: "Completed",
-  },
-]);
+import { getPatients } from "../../data/patientStorage";
 
+import { translations } from "../../constants/translations";
+import { useLanguage } from "../../constants/useLanguage";
 
-const [patient, setPatient] = useState("");
-const [analysis, setAnalysis] = useState("");
-const [doctor, setDoctor] = useState("");
-const [date, setDate] = useState("");
-const [note, setNote] = useState("");
-const [selectedRequest, setSelectedRequest] = useState(null);
-const [editingRequest, setEditingRequest] = useState(null);
-const [showModal, setShowModal] = useState(false);
-const addRequest = () => {
-  if (!patient || !analysis || !doctor || !date) return;
+function EmployeeEnterResult() {
+  const { language } = useLanguage();
+  const t = translations[language];
 
-  if (editingRequest) {
-    setRequests(
-      requests.map((request) =>
-        request.id === editingRequest.id
-          ? {
-              ...request,
-              patient,
-              analysis,
-              doctor,
-              date,
-              note,
-            }
-          : request
-      )
-    );
+  // =========================
+  // LOAD DATA
+  // =========================
+const [patients] = useState(() => getPatients());
+const [requests, setRequests] = useState(() => getRequests());
 
-    setEditingRequest(null);
-  } else {
-    setRequests([
-      ...requests,
-      {
-        id: Date.now(),
-        patient,
-        analysis,
-        doctor,
-        date,
-        note,
-        status: "Pending",
-      },
-    ]);
-  }
+  // =========================
+  // SELECTED DATA
+  // =========================
 
-  setPatient("");
-  setAnalysis("");
-  setDoctor("");
-  setDate("");
-  setNote("");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
-  setShowModal(false);
-};
-const viewRequest = (request) => {
-  setSelectedRequest(request);
-};
-const editRequest = (request) => {
-  setEditingRequest(request);
+  const [resultValues, setResultValues] = useState({});
+  const [notes, setNotes] = useState("");
 
-  setPatient(request.patient);
-  setAnalysis(request.analysis);
-  setDoctor(request.doctor);
-  setDate(request.date);
-  setNote(request.note || "");
+  // =========================
+  // PAGINATION
+  // =========================
 
-  setShowModal(true);
-};
+  const [currentPage, setCurrentPage] = useState(1);
 
-const deleteRequest = (id) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this request?"
+  const patientsPerPage = 5;
+
+  const totalPages = Math.ceil(
+    patients.length / patientsPerPage
   );
 
+  const startIndex =
+    (currentPage - 1) * patientsPerPage;
 
-  if (confirmDelete) {
-    setRequests(
-      requests.filter((request) => request.id !== id)
-    );
-  }
-};
-const changeStatus = (id, status) => {
+  const currentPatients = patients.slice(
+    startIndex,
+    startIndex + patientsPerPage
+  );
 
-  const updatedRequests = requests.map((request) => {
+  // =========================
+  // PATIENT REQUESTS
+  // =========================
 
-    if (request.id === id) {
+  const patientRequests = selectedPatient
+    ? requests.filter((request) => {
+        const requestPatientId =
+          typeof request.patient === "object"
+            ? request.patient?.id
+            : null;
 
-      if (status === "Completed") {
+        const requestPatientName =
+          typeof request.patient === "string"
+            ? request.patient
+            : request.patient?.name;
 
-        const results = getResults();
-
-        const exists = results.find(
-          (item) => item.id === request.id
+        return (
+          requestPatientId === selectedPatient.id ||
+          requestPatientName === selectedPatient.name
         );
+      })
+    : [];
 
+  // =========================
+  // SELECT PATIENT
+  // =========================
 
-        if (!exists) {
+  const handleSelectPatient = (patient) => {
+    setSelectedPatient(patient);
+    setSelectedRequest(null);
+    setResultValues({});
+    setNotes("");
+  };
 
-          saveResults([
-            ...results,
-            {
-              id: request.id,
-              patient: request.patient,
-              analysis: request.analysis,
-              doctor: request.doctor,
-              date: request.date,
-              status: "Completed",
-            }
-          ]);
+  // =========================
+  // SELECT REQUEST
+  // =========================
 
-        }
+  const handleSelectRequest = (request) => {
+    setSelectedRequest(request);
+    setResultValues({});
+    setNotes("");
+  };
 
-      }
+  // =========================
+  // RESULT CHANGE
+  // =========================
 
+  const handleResultChange = (testId, value) => {
+    setResultValues((prev) => ({
+      ...prev,
+      [testId]: value,
+    }));
+  };
 
-      return {
-        ...request,
-        status,
-      };
+  // =========================
+  // SAVE RESULT
+  // =========================
 
+  const handleSaveResult = () => {
+    if (!selectedPatient) {
+      alert(
+        t.selectPatientFirst ||
+          "Please select a patient first."
+      );
+      return;
     }
 
+    if (!selectedRequest) {
+      alert(
+        t.selectRequest ||
+          "Please select an analysis request first."
+      );
+      return;
+    }
 
-    return request;
+    const hasEmptyResult =
+      selectedRequest.tests?.some(
+        (test) =>
+          !resultValues[test.id] ||
+          String(resultValues[test.id]).trim() === ""
+      );
 
-  });
+    if (hasEmptyResult) {
+      alert(
+        t.enterAllResults ||
+          "Please enter all analysis results."
+      );
+      return;
+    }
 
+    // =========================
+    // CREATE RESULT
+    // =========================
 
-  setRequests(updatedRequests);
+    const newResult = {
+      id: `${selectedRequest.id}-${Date.now()}`,
+      requestId: selectedRequest.id,
 
-};
-const totalRequests = requests.length;
+      patientId: selectedPatient.id,
+      patient: selectedPatient,
 
-const pendingRequests = requests.filter(
-  (request) => request.status === "Pending"
-).length;
-const completedRequests = requests.filter(
-  (request) => request.status === "Completed"
-).length;
+      tests: selectedRequest.tests.map((test) => ({
+        ...test,
+        result: resultValues[test.id],
+      })),
 
+      notes,
 
-const todayRequests = requests.filter(
-  (request) =>
-    request.date === new Date().toISOString().slice(0, 10)
-).length;
+      date: new Date().toLocaleDateString(),
 
+      status: "Completed",
+    };
 
+    const currentResults = getResults();
 
-const filteredRequests = requests.filter((request) =>
-  request.patient.toLowerCase().includes(search.toLowerCase()) ||
-  request.analysis.toLowerCase().includes(search.toLowerCase()) ||
-  request.doctor.toLowerCase().includes(search.toLowerCase())
-);
+    const updatedResults = [
+      ...currentResults,
+      newResult,
+    ];
 
+    saveResults(updatedResults);
+
+    // =========================
+    // UPDATE REQUEST
+    // =========================
+
+    const currentRequests = getRequests();
+
+    const updatedRequests = currentRequests.map(
+      (request) =>
+        request.id === selectedRequest.id
+          ? {
+              ...request,
+              status: "Completed",
+            }
+          : request
+    );
+
+    saveRequests(updatedRequests);
+    setRequests(updatedRequests);
+
+    alert(
+      t.resultSaved ||
+        "Analysis result saved successfully."
+    );
+
+    // Reset selected request
+    setSelectedRequest(null);
+    setResultValues({});
+    setNotes("");
+  };
 
   return (
-<div className="
-p-4 sm:p-6
-bg-gray-50 dark:bg-gray-900
-min-h-screen
-overflow-x-hidden
-">      
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white p-4 sm:p-6 lg:p-8">
 
-     {/* HEADER */}
-<div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4"> 
-   <h1 className="text-xl font-bold text-gray-700">
-    🧪 Analysis Requests
-  </h1>
+      {/* ================= HEADER ================= */}
 
-  <button
-    onClick={() => setShowModal(true)}
-className="
-bg-blue-600 
-hover:bg-blue-700 
-text-white 
-px-5 
-py-2.5 
-rounded-xl
-font-medium
-shadow-sm
-hover:shadow-md
-transition-all
-w-full sm:w-auto
-"  >
-    + New Request
-  </button>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          {t.enterLaboratoryResult ||
+            "Enter Laboratory Result"}
+        </h1>
 
-</div>
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-<div className="bg-white dark:bg-gray-800
-border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm
-p-4 sm:p-5 flex justify-between items-center hover:shadow-lg transition">
-
-  <div>
-    <p className="text-gray-500 text-sm">
-      Total Requests
-    </p>
-
-    <h2 className="text-3xl font-bold">
-      {totalRequests}
-    </h2>
-  </div>
-
-  <div className="bg-blue-500 p-3 rounded-full text-white">
-    <FaClipboardList size={24} />
-  </div>
-
-</div>
-<div className="bg-white dark:bg-gray-800
-border border-gray-200 dark:border-gray-700
-rounded-2xl
-shadow-sm
-p-4 sm:p-5 flex justify-between items-center hover:shadow-lg transition">
-
-  <div>
-    <p className="text-gray-500 text-sm">
-     Pending
-    </p>
-
-    <h2 className="text-3xl font-bold">
-  {pendingRequests}
-      </h2>
-  </div>
-
-  <div className="bg-yellow-500 p-3 rounded-full text-white">
-<FaClock size={24} />
-  </div>
-
-</div>
-
-
-<div className="bg-white dark:bg-gray-800
-border border-gray-200 dark:border-gray-700
-rounded-2xl
-shadow-sm
-p-4 sm:p-5 flex justify-between items-center hover:shadow-lg transition">
-
-  <div>
-   <p className="text-gray-500 text-sm">
-  Completed
-</p>
-
-<h2 className="text-3xl font-bold">
-  {completedRequests}
-</h2> 
-  </div>
-
-  <div className="bg-green-500 p-3 rounded-full text-white">
-<FaCheckCircle size={24} />
-  </div>
-
-</div>
- 
-
-  
-
-
-
-<div className="bg-white dark:bg-gray-800
-border border-gray-200 dark:border-gray-700
-rounded-2xl
-shadow-sm
-p-4 sm:p-5 flex justify-between items-center hover:shadow-lg transition">
-
-  <div>
-    <p className="text-gray-500 text-sm">
-  Today
-    </p>
-
-    <h2 className="text-3xl font-bold">
-      {todayRequests}
-    </h2>
-  </div>
-
-  <div className="bg-indigo-500 p-3 rounded-full text-white">
-<FaCalendarDay size={24} />
-  </div>
-
-</div>
-
-
-</div>
-
-      {/* ADD FORM */}
-      
-<div className="mb-5 mt-4">
-    <input
-    type="text"
-    placeholder="🔍 Search by patient, analysis or doctor..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500
-"  />
-</div>
-      {/* TABLE */}
-<div className="mt-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm overflow-x-auto">      
-<div className="hidden lg:grid grid-cols-6 p-3 text-sm font-semibold">  
-<div>Patient</div>
-  <div>Analysis</div>
-  <div>Doctor</div>
-  <div>Date</div>
-  <div>Status</div>
-  <div className="text-right">Actions</div>
-</div>
-{filteredRequests.length === 0 && (
-  <div className="text-center py-6 text-gray-500">
-    No analysis requests found.
-  </div>
-)}
-    {filteredRequests.map((r) => (
-      
-  <div
-    key={r.id}
-className="hidden lg:grid grid-cols-6 p-3 border-t text-sm items-center"  >
-    <div>{r.patient}</div>
-
-<div>{r.analysis}</div>
-    <div>{r.doctor}</div>
-
-    <div>{r.date}</div>
-
-   <div>
- <select
-  value={r.status}
-  onChange={(e) => changeStatus(r.id, e.target.value)}
-  className={`px-3 py-1 rounded-full text-white text-xs outline-none
-    ${
-      r.status === "Completed"
-        ? "bg-green-500"
-        : r.status === "Pending"
-        ? "bg-yellow-500"
-        : "bg-red-500"
-    }`}
->
-  <option value="Pending">Pending</option>
-  <option value="Completed">Completed</option>
-  <option value="Cancelled">Cancelled</option>
-</select>
-</div>
-
-    <div className="flex justify-end gap-3">
-  <button
-    onClick={() => viewRequest(r)}
-    className="text-blue-600 hover:text-blue-800 transition"
-    title="View"
-  >
-    <FaEye size={18} />
-  </button>
-
-  <button
-    onClick={() => editRequest(r)}
-    className="text-green-600 hover:text-green-800 transition"
-    title="Edit"
-  >
-    <FaEdit size={18} />
-  </button>
-
-  <button
-    onClick={() => deleteRequest(r.id)}
-    className="text-red-600 hover:text-red-800 transition"
-    title="Delete"
-  >
-    <FaTrash size={18} />
-  </button>
-</div>
-  </div>
-))}
-
-
+        <p className="text-gray-500 dark:text-gray-400 mt-2">
+          {t.enterPatientResults ||
+            "Select a patient and enter the laboratory analysis results."}
+        </p>
       </div>
 
-      <div className="lg:hidden space-y-4 mt-4">
+      {/* ================= PATIENT LIST ================= */}
 
-{filteredRequests.map((r)=>(
-<div
-key={r.id}
-className="
-bg-gray-50
-dark:bg-gray-700
-rounded-xl
-p-4
-space-y-2
-"
->
+      {!selectedPatient && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 sm:p-6">
 
-<p>
-<b>Patient:</b> {r.patient}
-</p>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold">
+              {t.selectPatient || "Select Patient"}
+            </h2>
 
-<p>
-<b>Analysis:</b> {r.analysis}
-</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {t.selectPatientToEnterResult ||
+                "Select a patient to view their analysis requests."}
+            </p>
+          </div>
 
-<p>
-<b>Doctor:</b> {r.doctor}
-</p>
+          <div className="space-y-3">
 
-<p>
-<b>Date:</b> {r.date}
-</p>
+            {currentPatients.length > 0 ? (
+              currentPatients.map((patient) => (
+                <button
+                  key={patient.id}
+                  onClick={() =>
+                    handleSelectPatient(patient)
+                  }
+                  className="w-full flex items-center justify-between gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition text-left"
+                >
 
-<div>
-<b>Status:</b>
+                  <div className="flex items-center gap-4">
 
-<select
-value={r.status}
-onChange={(e)=>changeStatus(r.id,e.target.value)}
-className="ml-2 px-3 py-1 rounded-full"
->
-<option>Pending</option>
-<option>Completed</option>
-<option>Cancelled</option>
-</select>
+                    <div className="w-11 h-11 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center font-bold">
+                      {patient.name?.charAt(0)}
+                    </div>
 
-</div>
+                    <div>
+                      <h3 className="font-semibold">
+                        {patient.name}
+                      </h3>
 
+                      <p className="text-sm text-gray-500">
+                        {patient.gender || "-"} •{" "}
+                        {patient.age || "-"}{" "}
+                        {language === "ar"
+                          ? "سنة"
+                          : "Years"}
+                      </p>
+                    </div>
 
-<div className="flex gap-4 pt-3">
+                  </div>
 
-<button className="text-blue-600">
-<FaEye/>
-</button>
+                  <span className="text-gray-400 text-xl">
+                    ›
+                  </span>
 
-<button className="text-green-600">
-<FaEdit/>
-</button>
+                </button>
+              ))
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                {t.noPatientsFound ||
+                  "No patients found."}
+              </div>
+            )}
 
-<button className="text-red-600">
-<FaTrash/>
-</button>
+          </div>
 
-</div>
+          {/* ================= PAGINATION ================= */}
 
+          {totalPages > 1 && (
+            <div className="flex justify-end items-center gap-2 mt-6">
 
-</div>
-))}
+              <button
+                disabled={currentPage === 1}
+                onClick={() =>
+                  setCurrentPage(
+                    (prev) => prev - 1
+                  )
+                }
+                className="w-8 h-8 rounded-lg border flex items-center justify-center disabled:opacity-40"
+              >
+                <FaChevronLeft size={12} />
+              </button>
 
-</div>
-{showModal && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              ).map((page) => (
+                <button
+                  key={page}
+                  onClick={() =>
+                    setCurrentPage(page)
+                  }
+                  className={`w-8 h-8 rounded-lg text-sm ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white"
+                      : "border hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
 
-    <div className="bg-white rounded-xl p-6 w-[450px] shadow-xl">
+              <button
+                disabled={
+                  currentPage === totalPages
+                }
+                onClick={() =>
+                  setCurrentPage(
+                    (prev) => prev + 1
+                  )
+                }
+                className="w-8 h-8 rounded-lg border flex items-center justify-center disabled:opacity-40"
+              >
+                <FaChevronRight size={12} />
+              </button>
 
-      <h2 className="text-xl font-bold mb-4">
-  {editingRequest ? "Edit Analysis Request" : "New Analysis Request"}
-</h2>
-<input
-  className="w-full border p-2 rounded mb-3"
-  placeholder="Patient Name"
-  value={patient}
-  onChange={(e) => setPatient(e.target.value)}
-/>
+            </div>
+          )}
 
-<select
-  className="w-full border p-2 rounded mb-3"
-  value={analysis}
-  onChange={(e) => setAnalysis(e.target.value)}
->
-  <option value="">Select Analysis</option>
-  <option value="CBC">CBC</option>
-  <option value="Blood Sugar">Blood Sugar</option>
-  <option value="Urine Analysis">Urine Analysis</option>
-  <option value="Liver Function">Liver Function</option>
-  <option value="Kidney Function">Kidney Function</option>
-  <option value="Vitamin D">Vitamin D</option>
-  <option value="Thyroid Profile">Thyroid Profile</option>
-</select>
-
-<select
-  className="w-full border p-2 rounded mb-3"
-  value={doctor}
-  onChange={(e) => setDoctor(e.target.value)}
->
-  <option value="">Select Doctor</option>
-  <option value="Dr. Nada">Dr. Nada</option>
-  <option value="Dr. Ahmed">Dr. Ahmed</option>
-  <option value="Dr. Sara">Dr. Sara</option>
-  <option value="Dr. Mohamed">Dr. Mohamed</option>
-</select>
-<textarea
-  className="w-full border p-2 rounded mb-3"
-  rows={3}
-  placeholder="Doctor Notes (Optional)"
-  value={note}
-  onChange={(e) => setNote(e.target.value)}
-></textarea>
-   <input
-  type="date"
-  className="w-full border p-2 rounded mb-4"
-  value={date}
-  onChange={(e) => setDate(e.target.value)}
-/>
-
-      <div className="flex justify-end gap-2">
-
-        <button
-          onClick={() => setShowModal(false)}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Cancel
-        </button>
-
-     <button
-  onClick={addRequest}
-  className="bg-blue-600 text-white px-4 py-2 rounded"
-  
->
-{editingRequest ? "Update" : "Save"}
-</button>
-
-      </div>
-
-    </div>
-
-  </div>
-  
-)}
-
-{selectedRequest && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-
-<div className="
-bg-white
-dark:bg-gray-800
-rounded-xl
-p-5
-w-[95%]
-lg:w-[650px]
-max-h-[90vh]
-overflow-y-auto
-shadow-xl
-">
-      <h2 className="text-2xl font-bold mb-5">
-        Analysis Request Details
-      </h2>
-
-<div className="
-grid
-grid-cols-1
-sm:grid-cols-2
-gap-4
-">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold mb-3">👤 Patient</h3>
-
-          <p><strong>Name:</strong> {selectedRequest.patient}</p>
-          <p><strong>Doctor:</strong> {selectedRequest.doctor}</p>
-          <p><strong>Date:</strong> {selectedRequest.date}</p>
         </div>
+      )}
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold mb-3">🧪 Analysis</h3>
+      {/* ================= PATIENT REQUESTS ================= */}
 
-          <p><strong>Type:</strong> {selectedRequest.analysis}</p>
+      {selectedPatient && !selectedRequest && (
+        <div className="space-y-6">
 
-          <p><strong>Status:</strong> {selectedRequest.status}</p>
+          {/* Patient Header */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t.selectedPatient ||
+                    "Selected Patient"}
+                </p>
+
+                <h2 className="text-2xl font-bold mt-1">
+                  {selectedPatient.name}
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedPatient.gender || "-"} •{" "}
+                  {selectedPatient.age || "-"}{" "}
+                  {language === "ar"
+                    ? "سنة"
+                    : "Years"}
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setSelectedPatient(null);
+                  setSelectedRequest(null);
+                }}
+                className="px-4 py-2 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                ←{" "}
+                {t.changePatient ||
+                  "Change Patient"}
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* Requests */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
+
+            <h2 className="text-xl font-bold mb-2">
+              {t.analysisRequests ||
+                "Analysis Requests"}
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-6">
+              {t.patientRequests ||
+                "Analysis requests already registered for this patient."}
+            </p>
+
+            {patientRequests.length > 0 ? (
+              <div className="space-y-3">
+
+                {patientRequests.map((request) => {
+
+                  const alreadyCompleted =
+                    request.status === "Completed";
+
+                  return (
+                    <button
+                      key={request.id}
+                      disabled={alreadyCompleted}
+                      onClick={() =>
+                        handleSelectRequest(
+                          request
+                        )
+                      }
+                      className={`w-full text-left p-4 rounded-xl border transition ${
+                        alreadyCompleted
+                          ? "opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-900"
+                          : "hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      }`}
+                    >
+
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                        <div>
+                          <h3 className="font-semibold">
+                            {t.request ||
+                              "Request"}{" "}
+                            #{request.id}
+                          </h3>
+
+                          <p className="text-sm text-gray-500 mt-1">
+                            {request.tests?.length || 0}{" "}
+                            {language === "ar"
+                              ? "تحاليل"
+                              : "tests"}{" "}
+                            •{" "}
+                            {request.date}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`w-fit px-3 py-1 rounded-full text-sm ${
+                            alreadyCompleted
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {alreadyCompleted
+                            ? t.completed ||
+                              "Completed"
+                            : t.pending ||
+                              "Pending"}
+                        </span>
+
+                      </div>
+
+                    </button>
+                  );
+                })}
+
+              </div>
+            ) : (
+              <div className="text-center py-12">
+
+                <div className="text-5xl mb-4">
+                  🧪
+                </div>
+
+                <p className="text-gray-500">
+                  {t.noRequestsForPatient ||
+                    "No analysis requests found for this patient."}
+                </p>
+
+              </div>
+            )}
+
+          </div>
+
         </div>
+      )}
 
-        <div className="bg-gray-50 rounded-lg p-4 col-span-2">
-          <h3 className="font-semibold mb-3">
-            📝 Doctor Notes
-          </h3>
+      {/* ================= ENTER RESULT ================= */}
 
-          <p>
-            {selectedRequest.note || "No notes"}
-          </p>
+      {selectedPatient && selectedRequest && (
+        <div className="space-y-6">
+
+          {/* Patient */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t.patient || "Patient"}
+                </p>
+
+                <h2 className="text-2xl font-bold mt-1">
+                  {selectedPatient.name}
+                </h2>
+              </div>
+
+              <button
+                onClick={() =>
+                  setSelectedRequest(null)
+                }
+                className="px-4 py-2 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                ←{" "}
+                {t.backToRequests ||
+                  "Back to Requests"}
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* Tests */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
+
+            <h2 className="text-xl font-bold mb-6">
+              {t.enterResults ||
+                "Enter Results"}
+            </h2>
+
+            <div className="space-y-4">
+
+              {selectedRequest.tests?.map(
+                (test) => (
+                  <div
+                    key={test.id}
+                    className="border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+                  >
+
+                    <div className="mb-3">
+                      <h3 className="font-semibold">
+                        {test.name}
+                      </h3>
+
+                      <p className="text-sm text-gray-500">
+                        {test.category}
+                      </p>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={
+                        resultValues[test.id] || ""
+                      }
+                      onChange={(e) =>
+                        handleResultChange(
+                          test.id,
+                          e.target.value
+                        )
+                      }
+                      placeholder={
+                        t.enterResult ||
+                        "Enter result..."
+                      }
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
+                  </div>
+                )
+              )}
+
+            </div>
+
+          </div>
+
+          {/* Notes */}
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
+
+            <h2 className="font-bold mb-3">
+              {t.notes || "Notes"}
+            </h2>
+
+            <textarea
+              rows={4}
+              value={notes}
+              onChange={(e) =>
+                setNotes(e.target.value)
+              }
+              placeholder={
+                t.writeNotes ||
+                "Write notes..."
+              }
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+          </div>
+
+          {/* Save */}
+
+          <div className="flex justify-end">
+
+            <button
+              onClick={handleSaveResult}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-7 py-3 rounded-xl font-medium transition"
+            >
+              <FaSave />
+
+              {t.saveResult ||
+                "Save Result"}
+            </button>
+
+          </div>
+
         </div>
+      )}
 
-      </div>
-
-      <div className="flex justify-end mt-5">
-
-        <button
-          onClick={() => setSelectedRequest(null)}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Close
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-)}
     </div>
   );
 }
 
-export default EmployeeAnalysisRequests;
+export default EmployeeEnterResult;

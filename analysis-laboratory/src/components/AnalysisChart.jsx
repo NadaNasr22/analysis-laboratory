@@ -7,6 +7,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import { translations } from "../constants/translations";
+import { useLanguage } from "../constants/useLanguage";
+
 const data = [
   { day: "Mon", tests: 20 },
   { day: "Tue", tests: 35 },
@@ -18,10 +21,12 @@ const data = [
 ];
 
 function AnalysisChart() {
+  const { language } = useLanguage();
+
   return (
     <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-xl shadow">
       <h2 className="text-xl font-bold mb-4">
-        📈 Weekly Analysis
+        📈 {translations[language].weeklyAnalysis}
       </h2>
 
       <ResponsiveContainer width="100%" height={300}>
@@ -29,7 +34,11 @@ function AnalysisChart() {
           <XAxis dataKey="day" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="tests" fill="#2563eb" radius={[5, 5, 0, 0]} />
+          <Bar
+            dataKey="tests"
+            fill="#2563eb"
+            radius={[5, 5, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

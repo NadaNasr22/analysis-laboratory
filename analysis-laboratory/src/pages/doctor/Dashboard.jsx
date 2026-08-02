@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRequests } from "../../data/analysisRequestsStorage";
 import StatCard from "../../components/StatCard";
+import { translations } from "../../constants/translations";
+import { useLanguage } from "../../constants/useLanguage";
 import {
   FaUsers,
   FaFlask,
@@ -15,12 +17,19 @@ import {
 } from "react-icons/fa";
 
 function DoctorDashboard() {
+
+const { language } = useLanguage();
+const t = translations[language];
+
 const recentRequests = getRequests().slice(-5).reverse();
-  const navigate = useNavigate();
+
+const navigate = useNavigate();
+
 const [selectedRequest, setSelectedRequest] = useState(null);
 const [showViewModal, setShowViewModal] = useState(false);
 const [showEditModal, setShowEditModal] = useState(false);
 const [editingRequest, setEditingRequest] = useState(null);
+
 const getStatusStyle = (status) => {
   switch (status) {
     case "Completed":
@@ -51,43 +60,58 @@ const saveEditedRequest = () => {
 
   setShowEditModal(false);
 };
- return (
-<div className="space-y-8 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
 
+
+const translateAnalysis = (name) => {
+  return t.analysisNames?.[name] || name;
+};
+const translateStatus = (status) => {
+  const statusMap = {
+    Pending: t.pending,
+    Completed: t.completed,
+    Cancelled: t.cancelled,
+    Processing: t.processing,
+    Urgent: t.urgent,
+    Critical: t.critical,
+  };
+
+  return statusMap[status] || status;
+};
+ return (
+<div className="space-y-6 p-3 sm:p-5 lg:p-6 pt-20 sm:pt-22 lg:pt-24 bg-gray-50 dark:bg-gray-900 min-h-screen overflow-x-hidden">
+<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
   <div>
     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-      Good Morning, Doctor 👋
+     {t.goodMorning} 
     </h1>
 
     <p className="text-gray-500 mt-1">
-      Here is your laboratory overview today
-    </p>
+{t.overview}    </p>
   </div>
 
-  <div className="flex gap-3 mt-5 lg:mt-0">
+  <div className="flex flex-col sm:flex-row gap-3 mt-5 lg:mt-0">
 
    <button
   onClick={() => navigate("/doctor/patients")}
   className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium transition"
 >
-  + Add Patient
+  + {t.addPatient}
+
 </button>
 
    <button
   onClick={() => navigate("/doctor/analysis-requests")}
   className="bg-blue-600 text-white px-6 py-3 rounded-xl"
 >
-  + New Analysis Request
++ {t.newRequest}
 </button>
 
   </div>
 
 </div>
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-  
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">  
  <StatCard
-  title="Today's Patients"
+title={t.todayPatients}
   value="120"
 info="+12%"
   icon={<FaUsers size={24} />}
@@ -95,7 +119,7 @@ info="+12%"
 />
 
 <StatCard
-title="Pending Tests"
+  title={t.pendingTests}
   value="25"
 info="+5%"
   icon={<FaFlask size={24} />}
@@ -103,7 +127,7 @@ info="+5%"
 />
 
 <StatCard
-title="Today's Revenue"
+  title={t.todayRevenue}
 value="4,500 EGP"
 info="+8%"
   icon={<FaMoneyBillWave size={24} />}
@@ -111,49 +135,43 @@ info="+8%"
 />
 
 <StatCard
-title="Completed Reports"
+  title={t.completedReports}
  value="95"
 info="+16%"
   icon={<FaFileAlt size={24} />}
   color="bg-rose-500"
 />
 </div>
-      
-
-
-
 
 {/* Main Content */}
-<div className="grid grid-cols-12 gap-6 mt-6">
-
+<div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">
   {/* Left Side */}
-  <div className="col-span-12 xl:col-span-8">
-
+<div className="xl:col-span-8">
     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
 
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-          Recent Analysis Requests
+{t.recentRequests}
         </h2>
 
         <button
   onClick={() => navigate("/doctor/analysis-requests")}
   className="text-blue-600 text-sm font-semibold hover:underline"
 >
-  View All
+{t.viewAll}
 </button>
       </div>
 
-    <div className="overflow-x-auto">
-  <table className="w-full">
+<div className="hidden lg:block overflow-x-auto">
+    <table className="w-full">
 
     <thead className="text-gray-500 text-sm border-b">
       <tr>
-        <th className="text-left py-3 w-[40%]">Patient</th>
-        <th className="text-left w-[20%]">Analysis</th>
-        <th className="text-left w-[18%]">Status</th>
-        <th className="text-left w-[15%]">Date</th>
-        <th className="text-center w-[7%]">Action</th>
+        <th className="text-left py-3 w-[40%]">{t.patients}</th>
+        <th className="text-left w-[20%]">{t.analysis}</th>
+        <th className="text-left w-[18%]">{t.status}</th>
+        <th className="text-left w-[15%]">{t.date}</th>
+        <th className="text-center w-[7%]">{t.actions}</th>
       </tr>
     </thead>
 
@@ -181,15 +199,18 @@ info="+16%"
             </div>
           </td>
 
-          <td>{request.tests?.map(test => test.short).join(", ")}</td>
-
+<td>
+  {request.tests?.length > 0
+    ? request.tests.map(test => test.short || test.name).join(", ")
+    : "No Analysis"}
+</td>
           <td>
          <span
   className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
     request.status
   )}`}
 >
-  {request.status}
+ {translateStatus(request.status)}
 </span>
           </td>
 
@@ -218,6 +239,55 @@ info="+16%"
 
   </table>
 </div>
+<div className="lg:hidden space-y-4">
+  {recentRequests.map((request)=>(
+    <div
+      key={request.id}
+      className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 space-y-3"
+    >
+
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+          {request.patient?.name?.charAt(0)}
+        </div>
+
+        <div>
+          <p className="font-semibold dark:text-white">
+            {request.patient?.name}
+          </p>
+          <p className="text-xs text-gray-500">
+            #{request.id}
+          </p>
+        </div>
+      </div>
+
+
+      <p className="text-sm dark:text-white">
+        Tests:
+{request.tests
+  ?.map(test => translateAnalysis(test.name || test.short))
+  .join(", ")}      </p>
+
+
+      <span className={`px-3 py-1 rounded-full text-xs ${getStatusStyle(request.status)}`}>
+        {request.status}
+      </span>
+
+
+      <div className="flex justify-between items-center">
+        <span className="text-sm">
+          {request.date}
+        </span>
+
+        <div className="flex gap-3">
+          <FaEye className="text-blue-600"/>
+          <FaEdit className="text-green-600"/>
+        </div>
+      </div>
+
+    </div>
+  ))}
+</div>
 
     </div>
 
@@ -225,11 +295,10 @@ info="+16%"
 
   {/* Right Side */}
 
-  <div className="col-span-12 xl:col-span-4 space-y-6">
-
+<div className="xl:col-span-4 space-y-6">
 <div className="bg-white dark:bg-gray-800 dark:border-gray-700 rounded-2xl border p-5">
       <h2 className="font-bold text-lg mb-4">
-        Quick Actions
+{t.quickActions}
       </h2>
 
       <div className="space-y-3">
@@ -242,11 +311,11 @@ info="+16%"
 
   <div className="text-left">
     <p className="font-semibold text-gray-800 dark:text-white">
-      Add Patient
+  {t.addPatientAction}
     </p>
 
     <p className="text-xs text-gray-500 dark:text-gray-400">
-      Register patient profile
+  {t.registerPatientProfile}
     </p>
   </div>
 
@@ -260,11 +329,11 @@ info="+16%"
 
   <div className="text-left">
     <p className="font-semibold text-gray-800 dark:text-white">
-      Create Invoice
+  {t.createInvoice}
     </p>
 
     <p className="text-xs text-gray-500 dark:text-gray-400">
-      Generate billing details
+  {t.generateBillingDetails}
     </p>
   </div>
 
@@ -278,11 +347,11 @@ info="+16%"
 
   <div className="text-left">
     <p className="font-semibold text-gray-800 dark:text-white">
-      Upload Result
+  {t.uploadResult}
     </p>
 
     <p className="text-xs text-gray-500 dark:text-gray-400">
-      Import analysis data
+  {t.importAnalysisData}
     </p>
   </div>
 
@@ -296,11 +365,11 @@ info="+16%"
 
   <div className="text-left">
     <p className="font-semibold text-gray-800 dark:text-white">
-      Manage Tests
+  {t.manageTests}
     </p>
 
     <p className="text-xs text-gray-500 dark:text-gray-400">
-      Configure lab parameters
+  {t.configureLabParameters}
     </p>
   </div>
 
@@ -313,15 +382,15 @@ info="+16%"
     <div className="rounded-2xl p-6 text-white bg-gradient-to-r from-blue-600 to-indigo-600">
 
       <h3 className="text-xl font-bold">
-        Precision Analytics
+  {t.precisionAnalytics}
       </h3>
 
       <p className="text-sm mt-2 opacity-90">
-        New AI-powered laboratory insights are now available.
+  {t.aiLaboratoryInsights}
       </p>
 
       <button className="mt-5 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold">
-        Upgrade Now
+  {t.upgradeNow}
       </button>
 
     </div>
@@ -332,8 +401,7 @@ info="+16%"
 {showViewModal && selectedRequest && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-xl p-8">
-
+<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-[95%] max-w-xl p-5 sm:p-8">
       <div className="flex justify-between items-center mb-6">
 
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -433,8 +501,7 @@ info="+16%"
 {showEditModal && editingRequest && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg p-8">
-
+<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-[95%] max-w-lg p-5 sm:p-8">
       <div className="flex justify-between items-center mb-6">
 
         <h2 className="text-2xl font-bold dark:text-white">

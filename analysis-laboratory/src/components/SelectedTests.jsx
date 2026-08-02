@@ -1,15 +1,20 @@
 import { FaTrash } from "react-icons/fa";
+import { useLanguage } from "../constants/useLanguage";
+import { translations } from "../constants/translations";
 
 function SelectedTests({ tests, removeTest }) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   return (
     <div className="mt-6">
       <h3 className="font-semibold mb-3">
-        Selected Analysis
+        {t.selectedAnalysis}
       </h3>
 
       {tests.length === 0 ? (
         <p className="text-gray-500">
-          No analysis selected.
+          {t.noAnalysisSelected}
         </p>
       ) : (
         <div className="space-y-2">

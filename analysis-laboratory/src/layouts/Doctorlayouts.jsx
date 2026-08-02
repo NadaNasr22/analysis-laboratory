@@ -6,31 +6,29 @@ import DoctorNavbar from "../components/DoctorNavbar";
 function DoctorLayout() {
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  return (
-    <div className="flex">
+ return (
+  <div className="flex overflow-x-hidden">
 
-      <Sidebar
+    <Sidebar
+      openSidebar={openSidebar}
+      setOpenSidebar={setOpenSidebar}
+    />
+
+    <div className="flex-1 min-w-0 lg:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
+
+      <DoctorNavbar
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}
       />
 
-      <div className="flex-1 lg:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300">
-
-        <div className="sticky top-0 z-50">
-          <DoctorNavbar
-            openSidebar={openSidebar}
-            setOpenSidebar={setOpenSidebar}
-          />
-        </div>
-
-       <div className="px-8 py-6 bg-[#f6f8fb] dark:bg-[#111827] min-h-screen">
-  <Outlet />
-</div>
-
-      </div>
+      <main className="px-3 py-6 bg-[#f6f8fb] dark:bg-[#111827] min-h-[calc(100vh-64px)]">
+        <Outlet />
+      </main>
 
     </div>
-  );
+
+  </div>
+);
 }
 
 export default DoctorLayout;

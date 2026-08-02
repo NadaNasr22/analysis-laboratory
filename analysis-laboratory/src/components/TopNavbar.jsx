@@ -1,6 +1,5 @@
 import { FaMoon, FaSun, FaGlobe, FaUserCircle } from "react-icons/fa";
-import { useLanguage } from "../constants/Languageconstants";
-
+import { useLanguage } from "../constants/useLanguage";
 function TopNavbar({ darkMode, setDarkMode, title }) {
   const { language, toggleLanguage } = useLanguage();
 

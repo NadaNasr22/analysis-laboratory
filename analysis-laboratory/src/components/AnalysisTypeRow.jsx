@@ -8,8 +8,7 @@ function AnalysisTypeRow({
 
 }){
   return (
-    <div className="grid grid-cols-5 p-4 border-b items-center">
-
+<div className="grid min-w-[750px] grid-cols-[2fr_1.5fr_1fr_1fr_1.5fr] p-4 border-b items-center">
       <div>{analysis.name}</div>
 
       <div>{analysis.category}</div>

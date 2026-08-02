@@ -1,49 +1,60 @@
+import { translations } from "../../constants/translations";
+import { useLanguage } from "../../constants/useLanguage";
+
 function AddEmployee() {
+  const { language } = useLanguage();
+
   return (
     <div className="p-6">
 
       <h1 className="text-3xl font-bold mb-6">
-        Add Employee
+        {translations[language].addEmployee}
       </h1>
 
       <form className="bg-white shadow rounded-xl p-6 space-y-5">
 
         <div>
           <label className="block mb-2 font-medium">
-            Full Name
+            {translations[language].fullName}
           </label>
 
           <input
             type="text"
             className="w-full border rounded-lg p-3"
-            placeholder="Enter employee name"
+            placeholder={translations[language].enterEmployeeName}
           />
         </div>
 
         <div>
           <label className="block mb-2 font-medium">
-            Phone
+            {translations[language].phone}
           </label>
 
           <input
             type="text"
             className="w-full border rounded-lg p-3"
-            placeholder="Phone number"
+            placeholder={translations[language].phoneNumber}
           />
         </div>
 
         <div>
           <label className="block mb-2 font-medium">
-            Position
+            {translations[language].position}
           </label>
 
           <select className="w-full border rounded-lg p-3">
 
-            <option>Lab Technician</option>
+            <option>
+              {translations[language].labTechnician}
+            </option>
 
-            <option>Receptionist</option>
+            <option>
+              {translations[language].receptionist}
+            </option>
 
-            <option>Doctor</option>
+            <option>
+              {translations[language].doctor}
+            </option>
 
           </select>
 
@@ -51,20 +62,20 @@ function AddEmployee() {
 
         <div>
           <label className="block mb-2 font-medium">
-            Salary
+            {translations[language].salary}
           </label>
 
           <input
             type="number"
             className="w-full border rounded-lg p-3"
-            placeholder="Salary"
+            placeholder={translations[language].salary}
           />
         </div>
 
         <button
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
         >
-          Save Employee
+          {translations[language].saveEmployee}
         </button>
 
       </form>

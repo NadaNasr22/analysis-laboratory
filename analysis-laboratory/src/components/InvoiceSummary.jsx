@@ -1,8 +1,8 @@
 function InvoiceSummary({ tests, discount }) {
   const subtotal = tests.reduce(
-    (sum, test) => sum + test.price,
-    0
-  );
+  (sum, test) => sum + Number(test.price),
+  0
+);
 
   const total = subtotal - Number(discount || 0);
 

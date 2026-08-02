@@ -1,103 +1,146 @@
 import { NavLink } from "react-router-dom";
-// import { FaSignOutAlt } from "react-icons/fa";
+import { useLanguage } from "../constants/useLanguage";
+import { translations } from "../constants/translations";
 
-function EmployeeSidebar({ openSidebar }) {
+function EmployeeSidebar({ openSidebar, setOpenSidebar }) {
+  const { language } = useLanguage();
+
+  const t = translations[language];
+  const isArabic = language === "ar";
 
   const linkStyle = ({ isActive }) =>
     isActive
-      ? "block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl mb-2 shadow-sm"
-      : "block text-gray-600 dark:text-gray-300 font-medium px-6 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-all duration-300 mb-2";
+      ? "block bg-blue-600 text-white font-semibold px-4 sm:px-6 py-3 rounded-xl mb-2 shadow-sm transition-all duration-200"
+      : "block text-gray-600 dark:text-gray-300 font-medium px-4 sm:px-6 py-3 rounded-xl mb-2 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200";
 
+  const handleLinkClick = () => {
+    if (window.innerWidth < 1024) {
+      setOpenSidebar(false);
+    }
+  };
 
   return (
-    <div
-      className={`
-        fixed top-0 left-0 z-50
-        w-64 h-screen
-        bg-white dark:bg-gray-900
-        border-r border-gray-200 dark:border-gray-700
-        text-gray-800 dark:text-white
-        flex flex-col
-        transform transition-transform duration-300
-        ${
-          openSidebar
-            ? "translate-x-0"
-            : "-translate-x-full lg:translate-x-0"
-        }
-      `}
-    >
+    <>
+      {/* ==================== Overlay ==================== */}
+      {openSidebar && (
+        <div
+          onClick={() => setOpenSidebar(false)}
+          className="
+            fixed inset-0
+            bg-black/40
+            z-40
+            lg:hidden
+          "
+        />
+      )}
 
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      {/* ==================== Sidebar ==================== */}
+      <aside
+        dir={isArabic ? "rtl" : "ltr"}
+        className={`
+          fixed
+          top-0
+          left-0
+          z-50
 
-        <h1 className="text-2xl font-bold text-blue-600">
-          Future Laboratory
-        </h1>
+          w-64
+          h-screen
 
-        <p className="text-sm text-gray-500 mt-1">
-          Clinical Precision
-        </p>
+          bg-white
+          dark:bg-gray-900
 
-      </div>
+          border-r
+          border-gray-200
+          dark:border-gray-700
 
+          text-gray-800
+          dark:text-white
 
-      {/* Links */}
-      <ul className="mt-6 flex-1 px-2">
+          flex
+          flex-col
 
+          shadow-xl
+          lg:shadow-none
 
-        <NavLink
-          to="/employee/dashboard"
-          className={linkStyle}
-        >
-          Dashboard
-        </NavLink>
+          transform
+          transition-transform
+          duration-300
+          ease-in-out
 
+          ${
+            openSidebar
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+      >
+        {/* ==================== Logo ==================== */}
+        <div className="p-5 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <h1 className="text-xl sm:text-2xl font-bold text-blue-600">
+            {t.futureLaboratory}
+          </h1>
 
-        <NavLink
-          to="/employee/patients"
-          className={linkStyle}
-        >
-          Patients
-        </NavLink>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {t.clinicalPrecision}
+          </p>
+        </div>
 
+        {/* ==================== Links ==================== */}
+        <nav className="flex-1 overflow-y-auto px-2 py-5">
 
-        <NavLink
-          to="/employee/analysis-requests"
-          className={linkStyle}
-        >
-          Analysis Requests
-        </NavLink>
+          <NavLink
+            to="/employee/dashboard"
+            className={linkStyle}
+            onClick={handleLinkClick}
+          >
+            {t.dashboard}
+          </NavLink>
 
+          <NavLink
+            to="/employee/patients"
+            className={linkStyle}
+            onClick={handleLinkClick}
+          >
+            {t.patients}
+          </NavLink>
 
-        <NavLink
-          to="/employee/invoices"
-          className={linkStyle}
-        >
-          Invoices
-        </NavLink>
+          <NavLink
+            to="/employee/analysis-requests"
+            className={linkStyle}
+            onClick={handleLinkClick}
+          >
+            {t.analysisRequests}
+          </NavLink>
 
+          <NavLink
+            to="/employee/invoices"
+            className={linkStyle}
+            onClick={handleLinkClick}
+          >
+            {t.invoices}
+          </NavLink>
 
-        <NavLink
-          to="/employee/results"
-          className={linkStyle}
-        >
-          Results
-        </NavLink>
-<NavLink
- to="/employee/enter-result"
+          <NavLink
+            to="/employee/enter-result"
+            className={linkStyle}
+            onClick={handleLinkClick}
+          >
+            {t.enterLaboratoryResult}
+          </NavLink>
 
-          className={linkStyle}
->
+        </nav>
 
-  Enter Result
-
-</NavLink>
-
-      </ul>
-
-
-    </div>
+        {/* ==================== Bottom ==================== */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+            © {t.futureLaboratory}
+          </p>
+        </div>
+      </aside>
+    </>
   );
 }
 
 export default EmployeeSidebar;
+
+
