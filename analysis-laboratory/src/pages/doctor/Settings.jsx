@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { employeesData } from "../../data/employees";
 import { translations } from "../../constants/translations";
 import { useLanguage } from "../../constants/useLanguage";
@@ -29,8 +29,6 @@ function Settings() {
           adminName: "Admin",
           username: "admin",
           jobTitle: "Laboratory Administrator",
-          language: "English",
-          darkMode: false,
         };
   });
 
@@ -93,14 +91,6 @@ function Settings() {
 
   const permissions = currentEmployee?.permissions || {};
 
-  useEffect(() => {
-    if (settings.darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [settings.darkMode]);
-
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
 
@@ -110,7 +100,6 @@ function Settings() {
 
     reader.onloadend = () => {
       setLogo(reader.result);
-
       localStorage.setItem("labLogo", reader.result);
     };
 
@@ -218,15 +207,39 @@ function Settings() {
     }, 3000);
   };
 
+  const inputClass =
+    "w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 " +
+    "bg-white dark:bg-gray-700 " +
+    "text-gray-900 dark:text-white " +
+    "placeholder-gray-400 dark:placeholder-gray-300 " +
+    "outline-none focus:ring-2 focus:ring-blue-500";
+
+  const selectClass =
+    "w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 mb-6 " +
+    "bg-white dark:bg-gray-700 " +
+    "text-gray-900 dark:text-white " +
+    "outline-none focus:ring-2 focus:ring-blue-500";
+
   return (
-<div className="p-4 sm:p-6 pt-20 sm:pt-22 overflow-x-hidden">
+    <div
+      className="
+        p-4
+        sm:p-6
+        pt-20
+        sm:pt-22
+        overflow-x-hidden
+        text-gray-900
+        dark:text-white
+      "
+    >
+
       {/* Page Header */}
 
       <h1 className="text-3xl font-bold">
         {translations[language].settings}
       </h1>
 
-      <p className="text-gray-500 mt-2">
+      <p className="text-gray-500 dark:text-gray-400 mt-2">
         {translations[language].manageLaboratorySettings}
       </p>
 
@@ -239,7 +252,7 @@ function Settings() {
 
           <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
 
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
 
               {logo ? (
                 <img
@@ -255,22 +268,21 @@ function Settings() {
 
             </div>
 
-
             <div>
 
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {settings.labName}
               </h2>
 
-              <p className="text-gray-500 mt-2">
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
                 📍 {settings.address}
               </p>
 
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 📞 {settings.phone}
               </p>
 
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 📧 {settings.email}
               </p>
 
@@ -306,13 +318,13 @@ function Settings() {
 
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-4 sm:p-6 transition-all">
 
-          <h2 className="text-xl font-bold mb-6">
+          <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
             🏥 {translations[language].laboratoryInformation}
           </h2>
 
 
           {settingsMessage && (
-            <div className="bg-green-100 text-green-700 p-3 rounded-xl mb-4">
+            <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-xl mb-4">
               {settingsMessage}
             </div>
           )}
@@ -322,7 +334,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].laboratoryName}
               </label>
 
@@ -335,7 +347,7 @@ function Settings() {
                     labName: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
 
             </div>
@@ -343,7 +355,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].phoneNumber}
               </label>
 
@@ -356,7 +368,7 @@ function Settings() {
                     phone: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
 
             </div>
@@ -364,7 +376,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].emailAddress}
               </label>
 
@@ -377,7 +389,7 @@ function Settings() {
                     email: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
 
             </div>
@@ -385,7 +397,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].address}
               </label>
 
@@ -398,7 +410,7 @@ function Settings() {
                     address: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
 
             </div>
@@ -406,7 +418,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].website}
               </label>
 
@@ -419,7 +431,7 @@ function Settings() {
                     website: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
 
             </div>
@@ -427,7 +439,7 @@ function Settings() {
 
             <div>
 
-              <label className="block mb-2 font-medium">
+              <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
                 {translations[language].workingHours}
               </label>
 
@@ -440,203 +452,8 @@ function Settings() {
                     workingHours: e.target.value,
                   })
                 }
-                className="w-full border rounded-xl p-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={inputClass}
               />
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        {/* Administrator */}
-
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-6 transition-all">
-
-          <h2 className="text-xl font-bold mb-6">
-            👨‍⚕️ {translations[language].administrator}
-          </h2>
-
-
-          <div className="space-y-5">
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].administratorName}
-              </label>
-
-              <input
-                type="text"
-                value={settings.adminName}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    adminName: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl p-3"
-              />
-
-            </div>
-
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].username}
-              </label>
-
-              <input
-                type="text"
-                value={settings.username}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    username: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl p-3"
-              />
-
-            </div>
-
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].jobTitle}
-              </label>
-
-              <input
-                type="text"
-                value={settings.jobTitle}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    jobTitle: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl p-3"
-              />
-
-            </div>
-
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].role}
-              </label>
-
-              <select className="w-full border rounded-xl p-3">
-
-                <option>
-                  {translations[language].laboratoryDirector}
-                </option>
-
-                <option>
-                  {translations[language].administrator}
-                </option>
-
-                <option>
-                  {translations[language].manager}
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].contactEmail}
-              </label>
-
-              <input
-                type="email"
-                value={settings.email}
-                disabled
-                className="w-full border rounded-xl p-3 text-gray-900 dark:text-white"
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        {/* Appearance */}
-
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-6 transition-all">
-
-          <h2 className="text-xl font-bold mb-6">
-            🎨 {translations[language].appearance}
-          </h2>
-
-
-          <div className="space-y-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <h3 className="font-semibold">
-                  {translations[language].darkMode}
-                </h3>
-
-                <p className="text-sm text-gray-500">
-                  {translations[language].enableDarkTheme}
-                </p>
-
-              </div>
-
-
-              <input
-                type="checkbox"
-                checked={settings.darkMode}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    darkMode: e.target.checked,
-                  })
-                }
-                className="w-5 h-5"
-              />
-
-            </div>
-
-
-            <div>
-
-              <label className="block mb-2 font-medium">
-                {translations[language].language}
-              </label>
-
-
-              <select
-                value={settings.language}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    language: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl p-3"
-              >
-
-                <option value="English">
-                  {translations[language].english}
-                </option>
-
-                <option value="Arabic">
-                  {translations[language].arabic}
-                </option>
-
-              </select>
 
             </div>
 
@@ -647,9 +464,8 @@ function Settings() {
 
         {/* Security */}
 
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-6 transition-all">
-
-          <h2 className="text-xl font-bold mb-6">
+<div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-6 transition-all self-start">
+          <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
             🔐 {translations[language].security}
           </h2>
 
@@ -668,7 +484,7 @@ function Settings() {
                   current: e.target.value,
                 })
               }
-              className="w-full border rounded-xl p-3"
+              className={inputClass}
             />
 
 
@@ -684,7 +500,7 @@ function Settings() {
                   newPassword: e.target.value,
                 })
               }
-              className="w-full border rounded-xl p-3"
+              className={inputClass}
             />
 
 
@@ -700,14 +516,14 @@ function Settings() {
                   confirm: e.target.value,
                 })
               }
-              className="w-full border rounded-xl p-3"
+              className={inputClass}
             />
 
           </div>
 
 
           {passwordMessage && (
-            <div className="bg-green-100 text-green-700 p-3 rounded-xl mt-4">
+            <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-xl mt-4">
               {passwordMessage}
             </div>
           )}
@@ -727,12 +543,12 @@ function Settings() {
 
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md p-3 sm:p-6 transition-all lg:col-span-2 overflow-hidden">
 
-          <h2 className="text-xl font-bold mb-6">
+          <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
             👨‍💼 {translations[language].employeePermissions}
           </h2>
 
 
-          <label className="block font-medium mb-2">
+          <label className="block font-medium mb-2 text-gray-800 dark:text-gray-200">
             {translations[language].selectEmployee}
           </label>
 
@@ -742,13 +558,14 @@ function Settings() {
             onChange={(e) =>
               setSelectedEmployee(Number(e.target.value))
             }
-            className="w-full border rounded-xl p-3 mb-6"
+            className={selectClass}
           >
 
             {employees.map((employee) => (
               <option
                 key={employee.id}
                 value={employee.id}
+                className="bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
               >
                 {employee.name}
               </option>
@@ -758,7 +575,7 @@ function Settings() {
 
 
           {permissionsMessage && (
-            <div className="bg-green-100 text-green-700 p-3 rounded-xl mb-4">
+            <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-xl mb-4">
               {permissionsMessage}
             </div>
           )}
@@ -766,11 +583,11 @@ function Settings() {
 
           <div className="overflow-x-auto rounded-xl">
 
-            <table className="w-full min-w-[650px]">
+            <table className="w-full min-w-[650px] text-gray-900 dark:text-white">
 
               <thead>
 
-                <tr className="border-b">
+                <tr className="border-b border-gray-200 dark:border-gray-700">
 
                   <th className="p-3 text-left">
                     {translations[language].module}
@@ -819,17 +636,14 @@ function Settings() {
                         translations[language].invoices,
                     };
 
-
                     return (
                       <tr
                         key={module}
-                        className="border-b"
+                        className="border-b border-gray-200 dark:border-gray-700"
                       >
 
                         <td className="p-3 font-medium">
-
                           {moduleTranslations[module] || module}
-
                         </td>
 
 
@@ -854,6 +668,7 @@ function Settings() {
                                   permission
                                 )
                               }
+                              className="w-4 h-4 accent-blue-600 cursor-pointer"
                             />
 
                           </td>
@@ -917,9 +732,3 @@ function Settings() {
 }
 
 export default Settings;
-
-
-
-
-
-

@@ -632,21 +632,27 @@ function Employees() {
               </button>
 
               <button
-                onClick={addEmployee}
-                className="
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-blue-600
-                  hover:bg-blue-700
-                  text-white
-                  transition
-                "
-              >
-                {editingEmployee
-                  ? t.updateEmployee
-                  : t.save}
-              </button>
+  onClick={addEmployee}
+  className="
+    min-w-[100px]
+    h-11
+    px-5
+    py-2
+    rounded-xl
+    bg-blue-600
+    hover:bg-blue-700
+    text-white
+    whitespace-nowrap
+    flex
+    items-center
+    justify-center
+    transition
+  "
+>
+  {editingEmployee
+    ? t.update
+    : t.save}
+</button>
 
             </div>
 

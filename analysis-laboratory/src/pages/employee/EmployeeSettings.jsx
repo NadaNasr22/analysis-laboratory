@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../constants/useLanguage";
 import { translations } from "../../constants/translations";
 
 function EmployeeSettings() {
-  const { darkMode, setDarkMode } = useTheme();
   const { language } = useLanguage();
 
   const t = translations[language];
@@ -26,7 +24,6 @@ function EmployeeSettings() {
   const handleSaveName = () => {
     if (!employeeName.trim()) {
       setNameMessage(t.enterEmployeeNameError);
-
       return;
     }
 
@@ -49,25 +46,21 @@ function EmployeeSettings() {
 
     if (!currentPassword) {
       setPasswordMessage(t.enterCurrentPassword);
-
       return;
     }
 
     if (!newPassword) {
       setPasswordMessage(t.enterNewPassword);
-
       return;
     }
 
     if (newPassword.length < 6) {
       setPasswordMessage(t.passwordMinLength);
-
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setPasswordMessage(t.passwordsDoNotMatch);
-
       return;
     }
 
@@ -77,7 +70,6 @@ function EmployeeSettings() {
 
     if (currentPassword !== savedPassword) {
       setPasswordMessage(t.currentPasswordIncorrect);
-
       return;
     }
 
@@ -249,119 +241,6 @@ function EmployeeSettings() {
           </button>
         </div>
 
-        {/* ================= Appearance ================= */}
-
-        <div
-          className="
-            bg-white
-            dark:bg-gray-800
-            rounded-2xl
-            shadow-sm
-            border
-            border-gray-200
-            dark:border-gray-700
-            p-5
-            sm:p-6
-          "
-        >
-          <div className="flex items-center gap-3 mb-6">
-
-            <div
-              className="
-                w-11
-                h-11
-                rounded-xl
-                bg-purple-100
-                dark:bg-purple-900/30
-                flex
-                items-center
-                justify-center
-                text-xl
-              "
-            >
-              🎨
-            </div>
-
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold">
-                {t.appearance}
-              </h2>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t.customizeAppearance}
-              </p>
-            </div>
-
-          </div>
-
-          {/* Dark Mode */}
-
-          <div
-            className="
-              flex
-              items-center
-              justify-between
-              gap-4
-              p-4
-              rounded-xl
-              bg-gray-50
-              dark:bg-gray-700/50
-            "
-          >
-            <div>
-              <h3 className="font-semibold">
-                {t.darkMode}
-              </h3>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {t.enableDarkTheme}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setDarkMode(!darkMode)
-              }
-              className={`
-                w-14
-                h-8
-                rounded-full
-                relative
-                transition
-                shrink-0
-                ${
-                  darkMode
-                    ? "bg-blue-600"
-                    : "bg-gray-300"
-                }
-              `}
-            >
-              <span
-                className={`
-                  absolute
-                  top-1
-                  w-6
-                  h-6
-                  bg-white
-                  rounded-full
-                  shadow
-                  transition-all
-                  ${
-                    darkMode
-                      ? "right-1"
-                      : "left-1"
-                  }
-                `}
-              />
-            </button>
-          </div>
-
-          <div className="mt-5 text-center text-2xl">
-            {darkMode ? "🌙" : "☀️"}
-          </div>
-        </div>
-
         {/* ================= Password ================= */}
 
         <div
@@ -512,6 +391,7 @@ function EmployeeSettings() {
                 focus:ring-blue-500
               "
             />
+
           </div>
 
           <button
@@ -542,3 +422,4 @@ function EmployeeSettings() {
 }
 
 export default EmployeeSettings;
+

@@ -47,7 +47,6 @@ function Patients() {
         "Vitamin D Test",
       ],
     },
-
     {
       id: 2,
       name: "Sara Mohamed",
@@ -93,6 +92,9 @@ function Patients() {
   // Selected Patient
   const [selectedPatient, setSelectedPatient] = useState(null);
 
+  // Patient waiting for delete confirmation
+  const [patientToDelete, setPatientToDelete] = useState(null);
+
   // =========================
   // Get Patient Results
   // =========================
@@ -111,10 +113,13 @@ function Patients() {
   // =========================
 
   const viewPatient = (patient) => {
-  setSelectedPatient(patient);
-};
+    setSelectedPatient(patient);
+  };
 
+  // =========================
   // Add / Edit Patient
+  // =========================
+
   const addPatient = () => {
     if (!name || !age) return;
 
@@ -160,22 +165,34 @@ function Patients() {
     setShowModal(false);
   };
 
-  // Delete Patient
-  const deletePatient = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this patient?"
-    );
+  // =========================
+  // Open Delete Confirmation
+  // =========================
 
-    if (confirmDelete) {
-      setPatients(
-        patients.filter(
-          (patient) => patient.id !== id
-        )
-      );
-    }
+  const deletePatient = (id) => {
+    setPatientToDelete(id);
   };
 
+  // =========================
+  // Confirm Delete
+  // =========================
+
+  const confirmDeletePatient = () => {
+    if (!patientToDelete) return;
+
+    setPatients(
+      patients.filter(
+        (patient) => patient.id !== patientToDelete
+      )
+    );
+
+    setPatientToDelete(null);
+  };
+
+  // =========================
   // Edit Patient
+  // =========================
+
   const editPatient = (patient) => {
     setEditingPatient(patient);
 
@@ -188,7 +205,10 @@ function Patients() {
     setShowModal(true);
   };
 
+  // =========================
   // Translate Gender
+  // =========================
+
   const translateGender = (gender) => {
     if (language === "ar") {
       if (gender === "Male") return "ذكر";
@@ -198,7 +218,10 @@ function Patients() {
     return gender;
   };
 
+  // =========================
   // Translate Status
+  // =========================
+
   const translateStatus = (status) => {
     const statusMap = {
       Pending: t.pending,
@@ -209,14 +232,20 @@ function Patients() {
     return statusMap[status] || status;
   };
 
+  // =========================
   // Search
+  // =========================
+
   const filteredPatients = patients.filter((patient) =>
     patient.name
       .toLowerCase()
       .includes(search.toLowerCase())
   );
 
+  // =========================
   // Pagination
+  // =========================
+
   const totalPages = Math.ceil(
     filteredPatients.length / patientsPerPage
   );
@@ -236,7 +265,8 @@ function Patients() {
       {/* Page Header */}
       {/* ========================= */}
 
-<div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 pt-4 sm:pt-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 pt-4 sm:pt-6">
+
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t.patients}
@@ -486,6 +516,7 @@ function Patients() {
 
         {/* Pagination */}
         {filteredPatients.length > 0 && totalPages > 1 && (
+
           <div className="flex justify-end items-center gap-1 mt-5">
 
             <button
@@ -874,10 +905,12 @@ function Patients() {
       {/* ========================= */}
 
       {selectedPatient && (() => {
+
         const patientResults =
           getPatientResults(selectedPatient.id);
 
         return (
+
           <div
             className="
               fixed
@@ -979,9 +1012,7 @@ function Patients() {
                       </p>
 
                       <p className="font-semibold text-gray-800 dark:text-white">
-                        {translateGender(
-                          selectedPatient.gender
-                        )}
+                        {translateGender(selectedPatient.gender)}
                       </p>
                     </div>
 
@@ -1092,19 +1123,15 @@ function Patients() {
                           text-white
                           text-sm
                           ${
-                            selectedPatient.status ===
-                            "Completed"
+                            selectedPatient.status === "Completed"
                               ? "bg-green-500"
-                              : selectedPatient.status ===
-                                "Pending"
+                              : selectedPatient.status === "Pending"
                               ? "bg-yellow-500"
                               : "bg-red-500"
                           }
                         `}
                       >
-                        {translateStatus(
-                          selectedPatient.status
-                        )}
+                        {translateStatus(selectedPatient.status)}
                       </span>
 
                     </div>
@@ -1131,41 +1158,40 @@ function Patients() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
-                 {selectedPatient.analyses?.map(
-  (analysis, index) => {
+                    {selectedPatient.analyses?.map(
+                      (analysis, index) => {
 
-    const analysisName =
-      typeof analysis === "string"
-        ? analysis
-        : analysis?.name || "-";
+                        const analysisName =
+                          typeof analysis === "string"
+                            ? analysis
+                            : analysis?.name || "-";
 
-    return (
-      <div
-        key={index}
-        className="
-          bg-white
-          dark:bg-gray-800
-          rounded-xl
-          p-3
-          shadow-sm
-          border
-          border-gray-100
-          dark:border-gray-700
-          text-gray-800
-          dark:text-white
-        "
-      >
-        🧪{" "}
-        {t.analysisNames?.[analysisName] ||
-          analysisName}
-      </div>
-    );
-  }
-)}
+                        return (
+                          <div
+                            key={index}
+                            className="
+                              bg-white
+                              dark:bg-gray-800
+                              rounded-xl
+                              p-3
+                              shadow-sm
+                              border
+                              border-gray-100
+                              dark:border-gray-700
+                              text-gray-800
+                              dark:text-white
+                            "
+                          >
+                            🧪{" "}
+                            {t.analysisNames?.[analysisName] ||
+                              analysisName}
+                          </div>
+                        );
+                      }
+                    )}
 
                     {(!selectedPatient.analyses ||
-                      selectedPatient.analyses.length ===
-                        0) && (
+                      selectedPatient.analyses.length === 0) && (
 
                       <p className="text-gray-500 dark:text-gray-400">
                         {t.noAnalysis}
@@ -1177,10 +1203,7 @@ function Patients() {
 
                 </div>
 
-                {/* ========================= */}
                 {/* Laboratory Results */}
-                {/* ========================= */}
-
                 <div
                   className="
                     bg-gray-50
@@ -1195,6 +1218,7 @@ function Patients() {
                   <div className="flex items-center justify-between mb-5">
 
                     <div>
+
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         🧪{" "}
                         {language === "ar"
@@ -1207,6 +1231,7 @@ function Patients() {
                           ? "النتائج المسجلة لهذا المريض"
                           : "Laboratory results recorded for this patient"}
                       </p>
+
                     </div>
 
                     <span
@@ -1258,13 +1283,14 @@ function Patients() {
                               <div>
 
                                 <h4 className="font-bold text-gray-900 dark:text-white">
-  {result.analysisName || result.analysis || "-"}
-</h4>  {result.date}
-
+                                  {result.analysisName ||
+                                    result.analysis ||
+                                    "-"}
+                                </h4>
 
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-  {result.date || "-"}
-</p>
+                                  {result.date || "-"}
+                                </p>
 
                               </div>
 
@@ -1384,6 +1410,7 @@ function Patients() {
                         rounded-xl
                       "
                     >
+
                       <div className="text-3xl mb-2">
                         🧪
                       </div>
@@ -1433,12 +1460,117 @@ function Patients() {
             </div>
 
           </div>
+
         );
       })()}
+
+      {/* ========================= */}
+      {/* Delete Confirmation Modal */}
+      {/* ========================= */}
+
+      {patientToDelete !== null && (
+
+        <div
+          className="
+            fixed
+            inset-0
+            bg-black/50
+            backdrop-blur-sm
+            flex
+            items-center
+            justify-center
+            z-[100]
+            p-4
+          "
+        >
+
+          <div
+            className="
+              bg-white
+              dark:bg-gray-800
+              dark:text-white
+              rounded-2xl
+              shadow-2xl
+              p-6
+              w-full
+              max-w-sm
+            "
+          >
+
+            <div className="text-center">
+
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+
+                <HiOutlineTrash className="w-7 h-7 text-red-500" />
+
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {language === "ar"
+                  ? "تأكيد الحذف"
+                  : "Confirm Delete"}
+              </h2>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-6">
+                {language === "ar"
+                  ? "هل تريد تأكيد حذف هذا المريض؟"
+                  : "Are you sure you want to delete this patient?"}
+              </p>
+
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+
+              {/* Cancel */}
+              <button
+                type="button"
+                onClick={() => setPatientToDelete(null)}
+                className="
+                  px-4
+                  py-2
+                  bg-gray-200
+                  hover:bg-gray-300
+                  dark:bg-gray-700
+                  dark:hover:bg-gray-600
+                  text-gray-800
+                  dark:text-white
+                  rounded-xl
+                  transition
+                "
+              >
+                {t.cancel}
+              </button>
+
+              {/* Confirm Delete */}
+              <button
+                type="button"
+                onClick={confirmDeletePatient}
+                className="
+                  px-4
+                  py-2
+                  bg-red-500
+                  hover:bg-red-600
+                  text-white
+                  rounded-xl
+                  transition
+                "
+              >
+                {language === "ar"
+                  ? "حذف"
+                  : "Delete"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );
 }
 
 export default Patients;
+
 
